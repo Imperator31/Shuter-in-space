@@ -1,0 +1,8 @@
+{
+    "money": 5,
+    "purchased_ships": [
+        0,
+        1
+    ],
+    "selected_ship": 1
+}
