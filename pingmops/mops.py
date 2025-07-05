@@ -17,7 +17,9 @@ DARK_BLUE = (0, 0, 100)
 LIGHT_BLUE = (80, 80, 255)
 
 background = (174, 237, 232)
-window = pygame.display.set_mode((500, 500))
+WIDTH = 1000
+HEIGHT = 500
+window = pygame.display.set_mode((WIDTH, HEIGHT))
 fps = pygame.time.Clock()
 
 
@@ -60,77 +62,76 @@ class Picture(Area):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
 
-ball = Picture('police (1).png', 160, 200, 50, 50)
-platform_x = 200
-platform_y = 330
-platform = Picture('vodka.png', platform_x, platform_y, 100, 30)
+ball = Picture('ball.png', WIDTH // 2, HEIGHT // 2, 50, 50)
+platform_1 = Picture('vodochka.png', 0 + 50, HEIGHT // 2, 30, 100)
+platform_2 = Picture('vodochka.png', WIDTH - 80, HEIGHT // 2, 30, 100)
+platforms = tuple([platform_1,platform_2])
 
-start_x = 5
-start_y = 5
-
-monster_count = 9
-monsters = []
-for i in range(3):
-    y = start_y + 55 * i
-    x = start_x + 27.5 * i
-    for j in range(monster_count):
-        monsters.append(Picture(random.choice(['bomj.png', 'bomj_1.png']), x, y, 50, 50))
-        x += 55
-    monster_count -= 1
-
-move_left = False
-move_right = False
+score = 0
+move_left_1 = False
+move_right_1 = False
+move_left_2 = False
+move_right_2 = False
 game_over = False
-ball_x = 3
-ball_y = 3
+ball_x = random.choice([-3,3])
+ball_y = random.choice([-3,3])
 
 while not game_over:
     window.fill(background)
+    pygame.display.set_caption(f'Speed - {abs(ball_x)}, Score - {score}')
     ball.draw()
-    platform.draw()
-    for monster in monsters:
-        if monster.colliderect(ball.rect):
-            monsters.remove(monster)
-            ball_y = -ball_y
-        else:
-            monster.draw()
+    for index, platform in enumerate(platforms):
+        platform.draw()
+        if ball.colliderect(platform.rect):
+            ball_x = -ball_x
+            if index == 0:
+                score += -1
+            else:
+                score += 1
+            if ball_x > 0:
+                ball_x += 0.1
+            else:
+                ball_x += -0.1
+            if ball_y > 0:
+                ball_y += 1
+            else:
+                ball_y += -1
+
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a:
-                move_left = True
-            if event.key == pygame.K_d:
-                move_right = True
+            if event.key == pygame.K_w:
+                move_left_1 = True
+            if event.key == pygame.K_s:
+                move_right_1 = True
+            if event.key == pygame.K_UP:
+                move_left_2 = True
+            if event.key == pygame.K_DOWN:
+                move_right_2 = True
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_a:
-                move_left = False
-            if event.key == pygame.K_d:
-                move_right = False
+            if event.key == pygame.K_w:
+                move_left_1 = False
+            if event.key == pygame.K_s:
+                move_right_1 = False
+            if event.key == pygame.K_UP:
+                move_left_2 = False
+            if event.key == pygame.K_DOWN:
+                move_right_2 = False
         pass
-    if move_right:
-        platform.rect.x += 3
-    if move_left:
-        platform.rect.x -= 3
+    if move_right_1:
+        platform_1.rect.y += 10
+    if move_left_1:
+        platform_1.rect.y -= 10
+    if move_right_2:
+        platform_2.rect.y += 10
+    if move_left_2:
+        platform_2.rect.y -= 10
     ball.rect.x += ball_x
     ball.rect.y += ball_y
-    if ball.colliderect(platform.rect):
+    if ball.rect.y < 0 or ball.rect.y > HEIGHT - 50:
         ball_y = -ball_y
 
-    if ball.rect.y < 0:
-        ball_y = -ball_y
-
-    if ball.rect.x > 450 or ball.rect.x < 0:
+    if ball.rect.x > WIDTH - 50 or ball.rect.x < 0:
         ball_x = -ball_x
-
-    if ball.rect.y > (platform_y + 20):
-        end_text = Label(150, 200, 50, 50, background)
-        end_text.set_text('YOU LOSE', 60, (255, 0, 0))
-        end_text.draw(10, 10)
-        game_over = True
-    if len(monsters) == 0:
-        end_text = Label(150, 200, 50, 50, background)
-        end_text.set_text('YOU WIN', 60, (0, 200, 0))
-        end_text.draw(10, 10)
-        game_over = True
 
     pygame.display.update()
     fps.tick(40)
