@@ -73,8 +73,8 @@ move_right_1 = False
 move_left_2 = False
 move_right_2 = False
 game_over = False
-ball_x = random.choice([-3,3])
-ball_y = random.choice([-3,3])
+ball_x = random.choice([-2,2])
+ball_y = random.choice([-2,2])
 
 while not game_over:
     window.fill(background)
@@ -88,14 +88,16 @@ while not game_over:
                 score += -1
             else:
                 score += 1
+            if abs(score) >= 10:
+                game_over = True
             if ball_x > 0:
                 ball_x += 0.1
             else:
                 ball_x += -0.1
             if ball_y > 0:
-                ball_y += 1
+                ball_y += 0.1
             else:
-                ball_y += -1
+                ball_y += - 0.1
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -132,9 +134,37 @@ while not game_over:
 
     if ball.rect.x > WIDTH - 50 or ball.rect.x < 0:
         ball_x = -ball_x
-
-    pygame.display.update()
+        game_over = True
     fps.tick(40)
+    pygame.display.update()
 
-pygame.display.update()
+class TextRenderer:
+    def __init__(self, screen, font_name='arial', font_size=30, color=(255, 255, 255)):
+        self.screen = screen
+        self.font = pygame.font.SysFont(font_name, font_size)
+        self.color = color
+
+    def draw_text(self, text, x, y, center=True):
+        rendered_text = self.font.render(text, True, self.color)
+        text_rect = rendered_text.get_rect()
+        if center:
+            text_rect.center = (x, y)
+        else:
+            text_rect.topleft = (x, y)
+        self.screen.blit(rendered_text, text_rect)
+
+win = ''
+if score > 0:
+    win = 'Выиграл Игрок2'
+elif score < 0:
+    win = 'Выиграл Игрок1'
+else:
+    win = 'Ничья'
+text = TextRenderer(window)
+while True:
+    window.fill(GREEN)
+    text.draw_text(f'Исход игры - {win}', WIDTH // 2, HEIGHT // 2)
+    fps.tick(1)
+    pygame.display.update()
+
 
